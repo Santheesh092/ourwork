@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -48,9 +47,26 @@ type DM = {
 
 type Conversation = Channel | DM;
 
-type Team = ReturnType<typeof useChatData>['initialTeams'][0];
+// Fixed: Define proper Team type
+interface Team {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+  owner: string;
+  members: User[];
+  visibility: 'public' | 'private';
+  icon: string;
+  channels: Channel[];
+}
 
-const TeamsSidebar = ({ teams, selectedTeam, onSelectTeam, onCreateTeam, allTeamMembers }: { teams: Team[], selectedTeam: Team | null, onSelectTeam: (team: Team) => void, onCreateTeam: (team: Omit<Team, 'id' | 'channels'>) => void, allTeamMembers: User[] }) => {
+const TeamsSidebar = ({ teams, selectedTeam, onSelectTeam, onCreateTeam, allTeamMembers }: { 
+  teams: Team[], 
+  selectedTeam: Team | null, 
+  onSelectTeam: (team: Team) => void, 
+  onCreateTeam: (team: Omit<Team, 'id' | 'channels'>) => void, 
+  allTeamMembers: User[] 
+}) => {
     const [isCreateTeamOpen, setCreateTeamOpen] = useState(false);
 
     const handleCreateTeam = (e: React.FormEvent<HTMLFormElement>) => {
@@ -116,14 +132,14 @@ const TeamsSidebar = ({ teams, selectedTeam, onSelectTeam, onCreateTeam, allTeam
                                 <ScrollArea className="h-40 rounded-md border mt-2">
                                     <div className="p-4 space-y-2">
                                     {allTeamMembers.map(member => (
-                                        <div key={member.name} className="flex items-center gap-3">
-                                            <Checkbox id={`member-${member.name}`} name={`member-${member.name}`} />
+                                        <div key={member.id} className="flex items-center gap-3">
+                                            <Checkbox id={`member-${member.id}`} name={`member-${member.id}`} />
                                             <div className="flex items-center gap-2">
                                                 <Avatar className="h-8 w-8">
                                                     <AvatarImage data-ai-hint="person portrait" src={member.avatar} />
                                                     <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
                                                 </Avatar>
-                                                <Label htmlFor={`member-${member.name}`} className="font-normal">{member.name}</Label>
+                                                <Label htmlFor={`member-${member.id}`} className="font-normal">{member.name}</Label>
                                             </div>
                                         </div>
                                     ))}
@@ -289,7 +305,13 @@ const ConversationSidebar = ({
 };
 
 
-const ChatArea = ({ conversation, onSendMessage, onDeleteChannel, team, users }: { conversation: Conversation, onSendMessage: (text: string, conversationId: string) => void, onDeleteChannel: (channelId: string, teamId: string) => void, team: Team | null, users: User[] }) => {
+const ChatArea = ({ conversation, onSendMessage, onDeleteChannel, team, users }: { 
+  conversation: Conversation, 
+  onSendMessage: (text: string, conversationId: string) => void, 
+  onDeleteChannel: (channelId: string, teamId: string) => void, 
+  team: Team | null, 
+  users: User[] 
+}) => {
     const [newMessage, setNewMessage] = useState('');
     
     const handleSendMessage = (e: React.FormEvent) => {
@@ -316,7 +338,11 @@ const ChatArea = ({ conversation, onSendMessage, onDeleteChannel, team, users }:
         if (conversation.type === 'channel' && team) {
             return team.members.length;
         }
-        return conversation.members.length;
+        // Fixed: Only access members if it's a DM
+        if (conversation.type === 'dm') {
+            return conversation.members.length;
+        }
+        return 0;
     }, [conversation, team]);
 
     return (
@@ -350,7 +376,7 @@ const ChatArea = ({ conversation, onSendMessage, onDeleteChannel, team, users }:
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
                                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => onDeleteChannel(conversation.id, conversation.teamId)}>Delete</AlertDialogAction>
+                                        <AlertDialogAction onClick={() => conversation.type === 'channel' && onDeleteChannel(conversation.id, conversation.teamId)}>Delete</AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
@@ -418,8 +444,11 @@ const ChatArea = ({ conversation, onSendMessage, onDeleteChannel, team, users }:
 export default function ChatPage() {
     const { users } = useUsers();
     const { initialTeams, initialDms, allTeamMembers } = useChatData();
-    const [teams, setTeams] = useState<Team[]>(initialTeams);
-    const [dms, setDms] = useState<DM[]>(initialDms);
+    
+    // Fixed: Cast the data to the proper types
+    const [teams, setTeams] = useState<Team[]>(initialTeams as Team[]);
+    const [dms, setDms] = useState<DM[]>(initialDms as DM[]);
+    
     const [selectedTeam, setSelectedTeam] = useState<Team | null>(teams.length > 0 ? teams[0] : null);
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(
         teams.length > 0 && teams[0].channels.length > 0 ? teams[0].channels[0] : (dms.length > 0 ? dms[0] : null)
@@ -453,7 +482,7 @@ export default function ChatPage() {
         const newChannel: Channel = {
             id: `c-${Date.now()}`,
             teamId,
-            type: 'channel',
+            type: 'channel' as const, // Fixed: Ensure type is literal
             name: channelName,
             messages: []
         };
@@ -514,20 +543,25 @@ export default function ChatPage() {
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         };
 
-        const conv = [...teams.flatMap(t => t.channels), ...dms].find(c => c.id === conversationId);
+        // Check if it's a channel
+        for (const team of teams) {
+            const channel = team.channels.find(c => c.id === conversationId);
+            if (channel) {
+                channel.messages.push(newMessage);
+                setTeams([...teams]);
+                setSelectedConversation({...channel});
+                return;
+            }
+        }
         
-        if (conv) {
-           conv.messages.push(newMessage);
-
-           if (conv.type === 'channel') {
-               setTeams([...teams]);
-           } else {
-               setDms([...dms]);
-           }
-           setSelectedConversation({...conv});
+        // Check if it's a DM
+        const dm = dms.find(d => d.id === conversationId);
+        if (dm) {
+            dm.messages.push(newMessage);
+            setDms([...dms]);
+            setSelectedConversation({...dm});
         }
     };
-
 
   return (
     <div className="flex h-[calc(100vh-8rem)] animate-fade-in">
@@ -566,5 +600,3 @@ export default function ChatPage() {
     </div>
   );
 }
-
-    
