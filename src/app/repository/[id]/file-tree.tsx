@@ -1,15 +1,9 @@
-
 'use client';
 
 import { useState } from 'react';
 import { Folder, File, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-type FileOrFolder = {
-  name: string;
-  type: 'file' | 'folder';
-  children?: FileOrFolder[];
-};
+import type { FileOrFolder } from '@/lib/repositories-data';
 
 interface FileTreeProps {
   directory: FileOrFolder[];
@@ -36,7 +30,7 @@ const TreeItem = ({ item }: { item: FileOrFolder }) => {
       </div>
       {isOpen && item.children && (
         <div className="pl-6 border-l border-border ml-3">
-          {item.children.map(child => (
+          {item.children.map((child) => (
             <TreeItem key={child.name} item={child} />
           ))}
         </div>
@@ -48,7 +42,7 @@ const TreeItem = ({ item }: { item: FileOrFolder }) => {
 export const FileTree = ({ directory }: FileTreeProps) => {
   return (
     <div className="space-y-1">
-      {directory.map(item => (
+      {directory.map((item) => (
         <TreeItem key={item.name} item={item} />
       ))}
     </div>

@@ -9,7 +9,9 @@ export type Space = {
     name: string;
     description: string;
     progress: number;
-    members: { name: string; avatar: string; }[];
+    members: {
+        role: string; name: string; avatar: string; 
+}[];
     squadId: string | null;
 };
 
@@ -20,11 +22,26 @@ const initialSpaces: Space[] = [
       description: 'Modernize the company website and improve user experience.',
       progress: 75, 
       members: [
-        { name: 'Alex', avatar: 'https://picsum.photos/seed/alex/32/32' },
-        { name: 'Sam', avatar: 'https://picsum.photos/seed/sam/32/32' },
-        { name: 'Jordan', avatar: 'https://picsum.photos/seed/jordan/32/32' },
-        { name: 'Chris', avatar: 'https://picsum.photos/seed/chris/32/32' },
-        { name: 'Taylor', avatar: 'https://picsum.photos/seed/taylor/32/32' },
+        {
+          name: 'Alex', avatar: 'https://picsum.photos/seed/alex/32/32',
+          role: ""
+        },
+        {
+          name: 'Sam', avatar: 'https://picsum.photos/seed/sam/32/32',
+          role: ""
+        },
+        {
+          name: 'Jordan', avatar: 'https://picsum.photos/seed/jordan/32/32',
+          role: ""
+        },
+        {
+          name: 'Chris', avatar: 'https://picsum.photos/seed/chris/32/32',
+          role: ""
+        },
+        {
+          name: 'Taylor', avatar: 'https://picsum.photos/seed/taylor/32/32',
+          role: ""
+        },
       ],
       squadId: 'alpha-squad',
     },
@@ -34,9 +51,18 @@ const initialSpaces: Space[] = [
       description: 'Launch the new mobile app for iOS and Android.',
       progress: 40, 
       members: [
-        { name: 'Olivia', avatar: 'https://picsum.photos/seed/olivia/32/32' },
-        { name: 'Jackson', avatar: 'https://picsum.photos/seed/jackson/32/32' },
-        { name: 'Isabella', avatar: 'https://picsum.photos/seed/isabella/32/32' },
+        {
+          name: 'Olivia', avatar: 'https://picsum.photos/seed/olivia/32/32',
+          role: ""
+        },
+        {
+          name: 'Jackson', avatar: 'https://picsum.photos/seed/jackson/32/32',
+          role: ""
+        },
+        {
+          name: 'Isabella', avatar: 'https://picsum.photos/seed/isabella/32/32',
+          role: ""
+        },
       ], 
       squadId: 'bravo-squad',
     },
@@ -46,8 +72,14 @@ const initialSpaces: Space[] = [
       description: 'Integrate with third-party APIs for enhanced functionality.',
       progress: 90, 
       members: [
-        { name: 'William', avatar: 'https://picsum.photos/seed/william/32/32' },
-        { name: 'Sophia', avatar: 'https://picsum.photos/seed/sophia/32/32' },
+        {
+          name: 'William', avatar: 'https://picsum.photos/seed/william/32/32',
+          role: ""
+        },
+        {
+          name: 'Sophia', avatar: 'https://picsum.photos/seed/sophia/32/32',
+          role: ""
+        },
       ],
       squadId: null,
     },
@@ -57,10 +89,22 @@ const initialSpaces: Space[] = [
       description: 'Plan and execute the Q3 marketing campaign.',
       progress: 20,
       members: [
-        { name: 'Emma', avatar: 'https://picsum.photos/seed/emma/32/32' },
-        { name: 'Liam', avatar: 'https://picsum.photos/seed/liam/32/32' },
-        { name: 'Ava', avatar: 'https://picsum.photos/seed/ava/32/32' },
-        { name: 'Noah', avatar: 'https://picsum.photos/seed/noah/32/32' },
+        {
+          name: 'Emma', avatar: 'https://picsum.photos/seed/emma/32/32',
+          role: ""
+        },
+        {
+          name: 'Liam', avatar: 'https://picsum.photos/seed/liam/32/32',
+          role: ""
+        },
+        {
+          name: 'Ava', avatar: 'https://picsum.photos/seed/ava/32/32',
+          role: ""
+        },
+        {
+          name: 'Noah', avatar: 'https://picsum.photos/seed/noah/32/32',
+          role: ""
+        },
       ],
       squadId: 'charlie-squad',
     },
@@ -99,7 +143,7 @@ export const useSpaces = () => {
 
     const addSpace = (space: Omit<Space, 'id' | 'members' | 'progress'>) => {
         const squad = space.squadId ? getSquadById(space.squadId) : null;
-        const members = squad ? squad.members.map(m => ({ name: m.name, avatar: m.avatar })) : [];
+        const members = squad ? squad.members.map(m => ({ role: m.role ?? '', name: m.name, avatar: m.avatar })) : [];
 
         const newSpace: Space = {
             ...space,
@@ -123,7 +167,7 @@ export const useSpaces = () => {
                 const updatedSpace = { ...space, ...updates };
                 if (updates.squadId !== undefined) {
                     const squad = updates.squadId ? getSquadById(updates.squadId) : null;
-                    updatedSpace.members = squad ? squad.members.map(m => ({ name: m.name, avatar: m.avatar })) : [];
+                    updatedSpace.members = squad ? squad.members.map(m => ({ role: m.role ?? '', name: m.name, avatar: m.avatar })) : [];
                 }
                 return updatedSpace;
             }

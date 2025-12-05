@@ -26,7 +26,14 @@ export const initialUsers = [
   { name: 'Noah', avatar: 'https://picsum.photos/seed/noah/32/32', id: 'u20', role: 'UI/UX Designer' },
 ];
 
-export type User = typeof initialUsers[0];
+// explicit User type to allow optional 'online' and 'role' together
+export type User = {
+    id: string;
+    name: string;
+    avatar: string;
+    online?: boolean;
+    role?: string;
+};
 
 const getStoredUsers = (): User[] => {
     if (typeof window === 'undefined') return initialUsers;

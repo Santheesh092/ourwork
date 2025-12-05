@@ -7,6 +7,7 @@ export type VideoNote = {
     id: string;
     title: string;
     description: string;
+    content?: string; 
     spaceId: string | null;
     createdAt: string;
     videoUrl: string | null;

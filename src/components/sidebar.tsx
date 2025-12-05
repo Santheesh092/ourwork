@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -12,7 +11,6 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   LayoutDashboard,
@@ -46,67 +44,75 @@ export function AppSidebarContent() {
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
     router.push('/');
-  }
+  };
 
   const isActive = (href: string) => {
-    if (href === '/') return pathname === '/';
+    if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
-  }
+  };
 
   return (
     <>
       <SidebarHeader>
-        <div className="flex items-center gap-2">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <Shapes className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <h1 className="font-headline text-xl font-bold text-sidebar-foreground">
-              ourwork.space
-            </h1>
-          </Link>
-        </div>
+        <Link href="/dashboard" className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+            <Shapes className="h-5 w-5 text-primary-foreground" />
+          </div>
+          <h1 className="font-headline text-xl font-bold text-sidebar-foreground">
+            ourwork.space
+          </h1>
+        </Link>
       </SidebarHeader>
+
       <SidebarContent className="p-2">
         <SidebarMenu>
           {menuItems.map((item) => (
-             <SidebarMenuItem key={item.label}>
-              <SidebarMenuButton
-                as={Link}
-                href={item.href}
-                isActive={isActive(item.href)}
-                tooltip={item.label}
-              >
-                <item.icon />
-                <span>{item.label}</span>
+            <SidebarMenuItem key={item.href}>
+              <SidebarMenuButton isActive={isActive(item.href)} tooltip={item.label}>
+                <Link href={item.href} className="flex items-center gap-2 w-full">
+                  <item.icon className="w-4 h-4" />
+                  <span>{item.label}</span>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
       </SidebarContent>
+
       <SidebarFooter>
-         <SidebarMenu className="p-2">
-             <SidebarMenuItem>
-                <SidebarMenuButton as={Link} href="/settings" isActive={pathname === "/settings"} tooltip="Settings">
-                    <Settings /><span>Settings</span>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
-             <SidebarMenuItem>
-                <SidebarMenuButton onClick={handleLogout} tooltip="Logout">
-                    <LogOut /><span>Logout</span>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
+        <SidebarMenu className="p-2">
+          <SidebarMenuItem>
+            <SidebarMenuButton isActive={pathname === "/settings"} tooltip="Settings">
+              <Link href="/settings" className="flex items-center gap-2 w-full">
+                <Settings className="w-4 h-4" />
+                <span>Settings</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={handleLogout} tooltip="Logout">
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+
         <Separator className="my-1" />
+
         <div className="flex items-center gap-3 p-2">
-            <Avatar>
-                <AvatarImage data-ai-hint="person portrait" src="https://picsum.photos/seed/user/40/40" alt="User" />
-                <AvatarFallback>U</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col overflow-hidden">
-                <span className="truncate text-sm font-medium text-sidebar-foreground">John Doe</span>
-                <span className="truncate text-xs text-sidebar-foreground/70">john.doe@example.com</span>
-            </div>
+          <Avatar>
+            <AvatarImage src="https://picsum.photos/seed/user/40/40" alt="User" />
+            <AvatarFallback>U</AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col overflow-hidden">
+            <span className="truncate text-sm font-medium text-sidebar-foreground">
+              John Doe
+            </span>
+            <span className="truncate text-xs text-sidebar-foreground/70">
+              john.doe@example.com
+            </span>
+          </div>
         </div>
       </SidebarFooter>
     </>

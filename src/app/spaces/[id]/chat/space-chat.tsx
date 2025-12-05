@@ -204,7 +204,10 @@ const ChatArea = ({ conversation, onSendMessage, onDeleteChannel, team }: { conv
         if (conversation.type === 'channel' && team) {
             return team.members.length;
         }
-        return conversation.members.length;
+        if (conversation.type === 'dm') {
+            return conversation.members.length;
+        }
+        return 0;
     }, [conversation, team]);
 
     return (
